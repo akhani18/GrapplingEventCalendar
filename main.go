@@ -64,7 +64,7 @@ func IntentDispatcher(request alexa.Request) alexa.Response {
 	switch request.Body.Intent.Name {
 	case "UpcomingEventsIntent":
 		response = HandleUpcomingEventsIntent(request)
-	case "HelpIntent":
+	case alexa.HelpIntent:
 		response = HandleHelpIntent(request)
 	default:
 		response = HandleUnknownIntent(request)
