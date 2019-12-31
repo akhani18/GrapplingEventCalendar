@@ -1,6 +1,6 @@
 package alexa
 
-func NewSSMLResponse(title string, text string) Response {
+func NewSSMLResponse(title string, text string, endSession bool) Response {
 	r := Response{
 		Version: "1.0",
 		Body: ResBody{
@@ -8,7 +8,7 @@ func NewSSMLResponse(title string, text string) Response {
 				Type: "SSML",
 				SSML: text,
 			},
-			ShouldEndSession: true,
+			ShouldEndSession: endSession,
 		},
 	}
 	return r

@@ -11,8 +11,11 @@ import (
 func HandleUpcomingEventsIntent(request alexa.Request) alexa.Response {
 	var builder alexa.SSMLBuilder
 
-	builder.Say("Here are some of the upcoming grappling events.")
+	stateName := request.Body.Intent.Slots["state"].Value
+
+	builder.Say(fmt.Sprintf("Here are some of the upcoming competitions in %s.", stateName))
 	builder.Pause("500")
+
 	builder.Say("Grappling Industries Pheonix.")
 	builder.Pause("500")
 	builder.Say("In Scotsdale, Arizona.")
@@ -27,23 +30,32 @@ func HandleUpcomingEventsIntent(request alexa.Request) alexa.Response {
 	builder.Pause("500")
 	builder.Say("On February 22, 2020.")
 
-	return alexa.NewSSMLResponse("Upcoming Events", builder.Build())
+	return alexa.NewSSMLResponse("Upcoming Events", builder.Build(), true)
 }
 
 func HandleHelpIntent(request alexa.Request) alexa.Response {
 	var builder alexa.SSMLBuilder
-	builder.Say("Here are some of the things you can ask.")
-	builder.Pause("1000")
-	builder.Say("Give me the upcoming events.")
-	builder.Pause("1000")
-	builder.Say("What are the upcoming jiu jitsu events.")
-	builder.Pause("1000")
-	builder.Say("What are the upcoming grappling events.")
-	return alexa.NewSSMLResponse("GrapplingEventCalendar Help", builder.Build())
+
+	builder.Say("You can ask.")
+	builder.Pause("500")
+	builder.Say("Give me the upcoming jiu jitsu competitions.")
+	builder.Pause("500")
+	builder.Say("Give me the upcoming grappling competitions.")
+
+	return alexa.NewSSMLResponse("FightCalender Help", builder.Build(), false)
 }
 
-func HandleAboutIntent(request alexa.Request) alexa.Response {
-	return alexa.NewSimpleResponse("About", "An alexa voice skill that provides information about upcoming grappling events.")
+func HandleUnknownIntent(request alexa.Request) alexa.Response {
+	fmt.Printf("Errored request: %+v\n", request)
+	return alexa.NewSimpleResponse("Error", "Sorry, I had trouble doing what you asked. Please try again.", true)
+}
+
+func LaunchRequestHandler(request alexa.Request) alexa.Response {
+	var builder alexa.SSMLBuilder
+
+	builder.Say("Welcome to fight calendar. Which state do you want to compete in?")
+
+	return alexa.NewSSMLResponse("FightCalender Launch", builder.Build(), false)
 }
 
 func IntentDispatcher(request alexa.Request) alexa.Response {
@@ -54,10 +66,8 @@ func IntentDispatcher(request alexa.Request) alexa.Response {
 		response = HandleUpcomingEventsIntent(request)
 	case "HelpIntent":
 		response = HandleHelpIntent(request)
-	case "AboutIntent":
-		response = HandleAboutIntent(request)
 	default:
-		response = HandleHelpIntent(request)
+		response = HandleUnknownIntent(request)
 	}
 
 	return response
@@ -65,6 +75,11 @@ func IntentDispatcher(request alexa.Request) alexa.Response {
 
 func Handler(request alexa.Request) (alexa.Response, error) {
 	fmt.Printf("Request: %+v\n", request)
+
+	if request.Body.Type == "LaunchRequest" {
+		return LaunchRequestHandler(request), nil
+	}
+
 	return IntentDispatcher(request), nil
 }
 

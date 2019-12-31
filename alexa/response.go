@@ -1,6 +1,6 @@
 package alexa
 
-func NewSimpleResponse(title string, text string) Response {
+func NewSimpleResponse(title string, text string, endSession bool) Response {
 	r := Response{
 		Version: "1.0",
 		Body: ResBody{
@@ -13,7 +13,7 @@ func NewSimpleResponse(title string, text string) Response {
 				Title:   title,
 				Content: text,
 			},
-			ShouldEndSession: true,
+			ShouldEndSession: endSession,
 		},
 	}
 	return r
