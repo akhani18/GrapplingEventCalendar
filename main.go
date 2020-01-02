@@ -4,11 +4,14 @@ import (
 	"fmt"
 
 	"github.com/akhani18/GrapplingEventCalendar/alexa"
+	"github.com/akhani18/GrapplingEventCalendar/dao"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
 // Upcoming events logic goes here.
 func HandleUpcomingEventsIntent(request alexa.Request) alexa.Response {
+	dao.GetUpcomingCompetitionsInState()
+
 	var builder alexa.SSMLBuilder
 
 	stateName := request.Body.Intent.Slots["state"].Value
