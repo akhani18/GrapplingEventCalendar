@@ -10,13 +10,12 @@ import (
 
 // Upcoming events logic goes here.
 func HandleUpcomingEventsIntent(request alexa.Request) alexa.Response {
-	dao.GetUpcomingCompetitionsInState()
+	state := request.Body.Intent.Slots["state"].Value
+
+	dao.GetUpcomingCompetitionsInState(state)
 
 	var builder alexa.SSMLBuilder
-
-	stateName := request.Body.Intent.Slots["state"].Value
-
-	builder.Say(fmt.Sprintf("Here are some of the upcoming competitions in %s.", stateName))
+	builder.Say(fmt.Sprintf("Here are some of the upcoming competitions in %s.", state))
 	builder.Pause("500")
 
 	builder.Say("Grappling Industries Pheonix.")
