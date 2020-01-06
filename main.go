@@ -12,8 +12,6 @@ import (
 // Upcoming events logic goes here.
 func HandleUpcomingEventsIntent(request alexa.Request) alexa.Response {
 	state := request.Body.Intent.Slots["state"].Value
-	// TO DO: Validate state before passing.
-
 	comps := dao.GetUpcomingCompetitionsInState(state)
 
 	var builder alexa.SSMLBuilder
@@ -26,9 +24,9 @@ func HandleUpcomingEventsIntent(request alexa.Request) alexa.Response {
 
 		for _, comp := range comps {
 			builder.Say(comp.Name)
-			builder.Pause("500")
+			builder.Pause("200")
 			builder.Say(fmt.Sprintf("In %s, %s.", comp.City, comp.State))
-			builder.Pause("500")
+			builder.Pause("200")
 
 			d, err := time.Parse("2006-01-02", comp.Date)
 			if err != nil {
@@ -37,6 +35,7 @@ func HandleUpcomingEventsIntent(request alexa.Request) alexa.Response {
 			}
 
 			builder.Say(fmt.Sprintf("On %s %d, %d", d.Month().String(), d.Day(), d.Year()))
+			builder.Pause("500")
 		}
 	}
 
