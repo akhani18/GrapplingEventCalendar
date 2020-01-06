@@ -23,16 +23,13 @@ aws dynamodb query --table-name competitions \
 --index-name state-eventDate-index \
 --key-condition-expression "#st = :st AND #ed > :ed" \
 --expression-attribute-names '{ "#st": "state", "#ed": "eventDate" }' \
---expression-attribute-values '{ ":st": {"S": "oregon"}, ":ed": {"S": "2020-04-05"} }' \
---region us-west-2 \
---profile ankit-dev
+--expression-attribute-values '{ ":st": {"S": "oregon"}, ":ed": {"S": "2020-04-05"} }'
 */
-// make state lowercase
-//
-// TO DO: pagination?
 func GetUpcomingCompetitionsInState(state string) []*Competition {
 	state = strings.ToLower(state)
-	currentDate := time.Now().Format("2006-01-02")
+	currentTime := time.Now()
+	currentDate := currentTime.Format("2006-01-02")
+	fmt.Printf("CurrentDate: %v", currentTime)
 
 	params := &dynamodb.QueryInput{
 		KeyConditionExpression: aws.String("#st = :st AND #ed > :ed"),
@@ -52,9 +49,10 @@ func GetUpcomingCompetitionsInState(state string) []*Competition {
 		IndexName: aws.String("state-eventDate-index"), // TO DO: Get from env var
 	}
 
+	// TO DO: Handle pagination
 	result, err := db.Query(params)
 	if err != nil {
-		exitWithError(fmt.Errorf("failed to make scan API call, %v", err))
+		exitWithError(fmt.Errorf("failed to query database, %v", err))
 	}
 
 	comps := []*Competition{}
@@ -62,13 +60,13 @@ func GetUpcomingCompetitionsInState(state string) []*Competition {
 	// Unmarshal the Items field in the result value to the Item Go type.
 	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &comps)
 	if err != nil {
-		exitWithError(fmt.Errorf("failed to unmarshal scan result items, %v", err))
+		exitWithError(fmt.Errorf("failed to unmarshal database results, %v", err))
 	}
 
 	// Print out the items returned
-	for i, comp := range comps {
-		fmt.Printf("%d. name: %s, date: %s, city: %s, state: %s", i, comp.Name, comp.Date, comp.City, comp.State)
-	}
+	// for i, comp := range comps {
+	//   fmt.Printf("%d. name: %s, date: %s, city: %s, state: %s", i, comp.Name, comp.Date, comp.City, comp.State)
+	// }
 
 	return comps
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/akhani18/GrapplingEventCalendar/alexa"
 	"github.com/akhani18/GrapplingEventCalendar/dao"
@@ -11,26 +12,33 @@ import (
 // Upcoming events logic goes here.
 func HandleUpcomingEventsIntent(request alexa.Request) alexa.Response {
 	state := request.Body.Intent.Slots["state"].Value
+	// TO DO: Validate state before passing.
 
-	dao.GetUpcomingCompetitionsInState(state)
+	comps := dao.GetUpcomingCompetitionsInState(state)
 
 	var builder alexa.SSMLBuilder
-	builder.Say(fmt.Sprintf("Here are some of the upcoming competitions in %s.", state))
-	builder.Pause("500")
 
-	builder.Say("Grappling Industries Pheonix.")
-	builder.Pause("500")
-	builder.Say("In Scotsdale, Arizona.")
-	builder.Pause("500")
-	builder.Say("On January 4, 2020.")
+	if len(comps) == 0 {
+		builder.Say(fmt.Sprintf("I couldn't find any upcoming competitions in the state of %s.", state))
+	} else {
+		builder.Say(fmt.Sprintf("I found %d upcoming competition in %s.", len(comps), state))
+		builder.Pause("500")
 
-	builder.Pause("1000")
+		for _, comp := range comps {
+			builder.Say(comp.Name)
+			builder.Pause("500")
+			builder.Say(fmt.Sprintf("In %s, %s.", comp.City, comp.State))
+			builder.Pause("500")
 
-	builder.Say("NAGA San Diego Grappling Championship.")
-	builder.Pause("500")
-	builder.Say("In San Diego, California.")
-	builder.Pause("500")
-	builder.Say("On February 22, 2020.")
+			d, err := time.Parse("2006-01-02", comp.Date)
+			if err != nil {
+				fmt.Printf("Error parsing competition date: %+v", comp)
+				continue
+			}
+
+			builder.Say(fmt.Sprintf("On %s %d, %d", d.Month().String(), d.Day(), d.Year()))
+		}
+	}
 
 	return alexa.NewSSMLResponse("Upcoming Events", builder.Build(), true)
 }
