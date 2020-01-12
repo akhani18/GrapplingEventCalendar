@@ -19,13 +19,13 @@ func HandleUpcomingEventsIntent(request alexa.Request) alexa.Response {
 	if len(comps) == 0 {
 		builder.Say(fmt.Sprintf("I couldn't find any upcoming competitions in the state of %s.", state))
 	} else {
-		builder.Say(fmt.Sprintf("I found %d upcoming competition in %s.", len(comps), state))
+		builder.Say(fmt.Sprintf("I found %d upcoming competitions in %s.", len(comps), state))
 		builder.Pause("500")
 
 		for _, comp := range comps {
 			builder.Say(comp.Name)
 			builder.Pause("200")
-			builder.Say(fmt.Sprintf("In %s, %s.", comp.City, comp.State))
+			builder.Say(fmt.Sprintf("In %s,", comp.City))
 			builder.Pause("200")
 
 			d, err := time.Parse("2006-01-02", comp.Date)
